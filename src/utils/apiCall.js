@@ -1,6 +1,9 @@
 import axios from "axios";
 import { getToken } from "./store";
-let api_url = "http://localhost:5001/admin/api/";
+let api_url;
+if (process.env.NODE_ENV === "development")
+  api_url = "http://localhost:5001/api/admin/";
+else api_url = "https://strives.herokuapp.com/api/admin/";
 let token = getToken();
 
 class ApiCall {
