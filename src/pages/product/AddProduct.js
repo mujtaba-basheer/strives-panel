@@ -33,13 +33,13 @@ export default class addProduct extends Component {
         rating: 0,
         rating_count: 0,
         material: "",
-        colour: "",
         subtitle: "",
         category: "",
         sub_categories: [],
         tags: [],
         discount: undefined,
         stocks_available: undefined,
+        colour: {},
         gallery: {
           main: [{ name: "", data: "", src: "", type: "", extension: "" }],
           small: [{ name: "", data: "", src: "", type: "", extension: "" }],
@@ -52,6 +52,7 @@ export default class addProduct extends Component {
       },
       categories: [],
       sub_categories: [],
+      coloursList: [],
       tags: [],
       loading: false,
     };
@@ -59,6 +60,14 @@ export default class addProduct extends Component {
 
   componentDidMount = async () => {
     let res;
+
+    try {
+      res = await apiCall.get("colours");
+      this.setState({ coloursList: res.data.data });
+    } catch (error) {
+      console.error(error.response);
+      message.error(error.response.data.message);
+    }
 
     try {
       res = await apiCall.get("categories");
@@ -163,13 +172,17 @@ export default class addProduct extends Component {
     const category = categories.find(({ _id }) => id === _id);
     if (category) {
       const { tags, sub_categories } = category;
+      console.log(sub_categories);
       const product = Object.assign({}, this.state.product);
       product.tags = tags;
       product.category = id;
-      product.sub_categories = category.sub_categories.map((subCat) => {
-        delete subCat.values;
-        return { ...subCat, value: "" };
+      product.sub_categories = sub_categories.map((subCat) => {
+        const subCatObj = Object.assign({}, subCat);
+        delete subCatObj.values;
+        subCatObj.value = "";
+        return subCatObj;
       });
+      console.log(product.sub_categories, sub_categories);
       this.setState({
         sub_categories,
         product,
@@ -199,6 +212,7 @@ export default class addProduct extends Component {
       sub_categories: sub_categories_list,
       tags: tags_list,
       loading,
+      coloursList,
     } = this.state;
     const {
       name,
@@ -216,6 +230,7 @@ export default class addProduct extends Component {
       display,
       tags,
       stocks_available,
+      colour,
     } = product;
 
     return (
@@ -427,7 +442,7 @@ export default class addProduct extends Component {
                       </div>
                       <Divider />
                       <div className="row">
-                        <div className="col-md-4">
+                        <div className="col-md-3">
                           <label>Free Shipping?</label>
                           <Checkbox
                             style={{
@@ -445,7 +460,7 @@ export default class addProduct extends Component {
                             Free Shipping
                           </Checkbox>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-3">
                           <label>Material</label>
                           <input
                             required
@@ -458,7 +473,54 @@ export default class addProduct extends Component {
                             placeholder="Material"
                           />
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-3">
+                          <label>Colour</label>
+                          <Select
+                            value={colour["_id"]}
+                            onChange={(e) => {
+                              const index = coloursList.findIndex(
+                                ({ _id: id }) => id === e
+                              );
+                              if (index >= 0) {
+                                product.colour = coloursList[index];
+                                this.setState({ product });
+                              }
+                            }}
+                            className="ant-d-form-fields"
+                            required
+                            style={{ width: 200, padding: "9px 15px" }}
+                            placeholder="Select Colour"
+                            optionFilterProp="children"
+                          >
+                            {coloursList.map(
+                              ({ _id: id, full_name, hexcode }) => (
+                                <Option key={id} value={id}>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      alignItems: "flex-start",
+                                    }}
+                                  >
+                                    <p>{full_name}</p>
+                                    <span
+                                      style={{
+                                        height: "20px",
+                                        width: "20px",
+                                        borderRadius: "50%",
+                                        background: `#${hexcode}`,
+                                        display: "inline-block",
+                                        marginTop: "5px",
+                                        marginLeft: "10px",
+                                      }}
+                                    ></span>
+                                  </div>
+                                </Option>
+                              )
+                            )}
+                          </Select>
+                        </div>
+                        <div className="col-md-3">
                           <label>Category</label>
                           <Select
                             value={category}
@@ -478,12 +540,12 @@ export default class addProduct extends Component {
                         </div>
                       </div>
                       <div className="row">
-                        {sub_categories_list.map(
-                          ({ _id: id, name, values }, index) => (
+                        {sub_categories.map(
+                          ({ _id: id, name, value }, index) => (
                             <div key={id} className="col-md-4">
                               <label>{name}</label>
                               <Select
-                                value={sub_categories[index]["value"]}
+                                value={value}
                                 onChange={(e) => {
                                   product.sub_categories[index]["value"] = e;
                                   this.setState({ product });
@@ -494,11 +556,13 @@ export default class addProduct extends Component {
                                 placeholder="Select Value"
                                 optionFilterProp="children"
                               >
-                                {values.map((val) => (
-                                  <Option key={val} value={val}>
-                                    {val}
-                                  </Option>
-                                ))}
+                                {sub_categories_list[index].values.map(
+                                  (val) => (
+                                    <Option key={val} value={val}>
+                                      {val}
+                                    </Option>
+                                  )
+                                )}
                               </Select>
                             </div>
                           )
