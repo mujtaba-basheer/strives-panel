@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Layout, Menu } from "antd";
+import { Divider, Layout, Menu } from "antd";
 import { Link } from "react-router-dom";
 import { getUser } from "../utils/store";
 
@@ -113,6 +113,7 @@ export default class sidebar extends Component {
               Add Product
             </Link>
           </Menu.Item>
+          <Divider />
           <Menu.Item key="20" icon="true">
             <Link
               onClick={(e) => {
