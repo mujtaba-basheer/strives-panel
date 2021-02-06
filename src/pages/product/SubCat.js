@@ -204,7 +204,7 @@ export default class SubCat extends Component {
         key: "action",
         render: (text, record) => (
           <Popconfirm
-            title="Delete this tag"
+            title="Delete this sub-category?"
             onConfirm={(e) => {
               e.preventDefault();
               this.deleteSubCat(record._id);

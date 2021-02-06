@@ -126,7 +126,7 @@ export default class Tags extends Component {
         key: "action",
         render: (text, record) => (
           <Popconfirm
-            title="Delete this tag"
+            title="Delete this tag?"
             onConfirm={(e) => {
               e.preventDefault();
               this.deleteTag(record._id);

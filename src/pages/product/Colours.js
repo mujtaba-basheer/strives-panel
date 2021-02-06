@@ -148,7 +148,7 @@ export default class Colours extends Component {
         key: "action",
         render: (text, record) => (
           <Popconfirm
-            title="Delete this tag"
+            title="Delete this colour?"
             onConfirm={(e) => {
               e.preventDefault();
               this.deleteColour(record._id);

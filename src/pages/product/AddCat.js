@@ -281,7 +281,7 @@ export default class addCat extends Component {
                       <Divider />
                       <div className="col-md-6">
                         <Select
-                          mode="multiple"
+                          mode="tags"
                           className="ant-d-form-fields"
                           showSearch
                           onChange={(e) => this.setState({ tags: e })}

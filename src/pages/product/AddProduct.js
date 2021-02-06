@@ -573,7 +573,7 @@ export default class addProduct extends Component {
                           <label>Product Tags</label>
                           <Select
                             value={tags}
-                            mode="multiple"
+                            mode="tags"
                             onChange={(e) => {
                               product.tags = e;
                               this.setState({ product });
