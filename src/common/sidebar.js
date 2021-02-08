@@ -113,8 +113,18 @@ export default class sidebar extends Component {
               Add Product
             </Link>
           </Menu.Item>
+          <Menu.Item key="6" icon="true">
+            <Link
+              onClick={(e) => {
+                document.body.classList.toggle("isClosed");
+              }}
+              to="/product/list-category"
+            >
+              Categories List
+            </Link>
+          </Menu.Item>
           <Divider />
-          <Menu.Item key="20" icon="true">
+          {/* <Menu.Item key="20" icon="true">
             <Link
               onClick={(e) => {
                 document.body.classList.toggle("isClosed");
@@ -213,7 +223,7 @@ export default class sidebar extends Component {
             >
               My Profile
             </Link>
-          </Menu.Item>
+          </Menu.Item> */}
           <Menu.Item key="9" icon="true">
             <Link
               onClick={(e) => {

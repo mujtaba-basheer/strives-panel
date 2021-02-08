@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import Sidebar from "../../common/sidebar";
+import Sidebar from "../../../common/sidebar";
 import { Layout, PageHeader, message, Select, Divider } from "antd";
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
-import apiCall from "../../utils/apiCall";
+import apiCall from "../../../utils/apiCall";
 import "antd/dist/antd.css";
 const { Header, Content, Footer } = Layout;
 const { Option } = Select;

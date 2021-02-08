@@ -15,9 +15,11 @@ const Dashboard = lazy(() => import("./pages/dashboard"));
 
 const tags = lazy(() => import("./pages/product/Tags"));
 const subCategories = lazy(() => import("./pages/product/SubCat"));
-const addCategory = lazy(() => import("./pages/product/AddCat"));
 const colours = lazy(() => import("./pages/product/Colours"));
 const addProduct = lazy(() => import("./pages/product/AddProduct"));
+
+const addCategory = lazy(() => import("./pages/product/category/AddCat"));
+const listCategory = lazy(() => import("./pages/product/category/CatList"));
 
 // const UserDashboard = lazy(() => import("./pages/userdashboard"));
 // const addmanager = lazy(() => import("./pages/addmanager"));
@@ -87,6 +89,12 @@ class Routes extends Component {
               exact
               path="/product/add-category"
               component={addCategory}
+            />
+
+            <ProtectedRoute
+              exact
+              path="/product/list-category"
+              component={listCategory}
             />
 
             <ProtectedRoute exact path="/product/colours" component={colours} />
