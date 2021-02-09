@@ -17,18 +17,42 @@ export default class addCat extends Component {
       tags: [],
       name: "",
       desc: "",
+      category_id: "",
     };
   }
+
   componentDidMount = async () => {
     const category_id = this.props.location.pathname.split("/")[3];
-    let resp = await apiCall.get(`category/${category_id}`);
-    console.log(resp.data.data);
+
+    try {
+      let resp = await apiCall.get(`category/${category_id}`);
+      const { desc, tags, name, sub_categories } = resp.data.data;
+      this.setState({
+        desc,
+        tags,
+        name,
+        sub_categories: sub_categories.map((item) => ({
+          ...item,
+          selected: item.values,
+        })),
+        category_id,
+      });
+    } catch (error) {}
     let response = apiCall.get("sub-categories");
     let response1 = apiCall.get("tags");
     let data = await Promise.all([response, response1]);
     if (data[0].data.status) {
+      const sub_cat_arr = [...this.state.sub_categories];
+      sub_cat_arr.forEach((subCat) => {
+        const sub_cat = data[0].data.data.find(
+          (item) => item["_id"] === subCat["_id"]
+        );
+        subCat.values = sub_cat.values;
+        return subCat;
+      });
       this.setState({
         sub_cat_list: data[0].data.data,
+        sub_categories: sub_cat_arr,
       });
     } else {
       message.error(`${response.data.message}`);
@@ -37,34 +61,6 @@ export default class addCat extends Component {
       this.setState({
         tags_list: data[1].data.data,
       });
-    } else {
-      message.error(`${response.data.message}`);
-    }
-  };
-
-  addUser = async () => {
-    let response = await apiCall.post("addUsers", {
-      name: this.state.name,
-      email: this.state.email,
-      password: this.state.password,
-      userType: "worker",
-      phone: this.state.phone,
-      objectAssigned: this.state.objectAssigned,
-      managerAssigned: this.state.managerAssigned,
-      companyAssigned: this.state.companyAssigned,
-    });
-    if (response.data.status) {
-      this.setState({
-        name: "",
-        email: "",
-        password: "",
-        userType: "",
-        phone: "",
-        objectAssigned: "",
-        managerAssigned: "",
-        companyAssigned: "",
-      });
-      message.success("User Added");
     } else {
       message.error(`${response.data.message}`);
     }
@@ -101,8 +97,11 @@ export default class addCat extends Component {
 
   // submit handlers
 
-  addCategory = async () => {
-    const { desc, name, tags, sub_categories } = Object.assign({}, this.state);
+  updateCategory = async () => {
+    const { desc, name, tags, sub_categories, category_id } = Object.assign(
+      {},
+      this.state
+    );
     sub_categories.forEach((sc) => {
       sc.values = sc.selected;
       delete sc.selected;
@@ -110,7 +109,7 @@ export default class addCat extends Component {
     const data = { desc, name, tags, sub_categories };
 
     try {
-      const res = await apiCall.post("category", data);
+      const res = await apiCall.put(`category/${category_id}`, data);
       message.success(res.data.message);
       this.setState({
         sub_cat_list: [],
@@ -176,12 +175,12 @@ export default class addCat extends Component {
                   <PageHeader
                     className="site-page-header"
                     onBack={null}
-                    title="Add Category"
+                    title="Edit Category"
                   />
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
-                      this.addCategory();
+                      this.updateCategory();
                     }}
                     className="custom-form"
                   >
@@ -309,7 +308,7 @@ export default class addCat extends Component {
                         <input
                           type="submit"
                           className="form-button"
-                          value="ADD CATEGORY"
+                          value="UPDATE CATEGORY"
                         />
                       </div>
                     </div>

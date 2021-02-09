@@ -39,34 +39,6 @@ export default class addCat extends Component {
     }
   };
 
-  addUser = async () => {
-    let response = await apiCall.post("addUsers", {
-      name: this.state.name,
-      email: this.state.email,
-      password: this.state.password,
-      userType: "worker",
-      phone: this.state.phone,
-      objectAssigned: this.state.objectAssigned,
-      managerAssigned: this.state.managerAssigned,
-      companyAssigned: this.state.companyAssigned,
-    });
-    if (response.data.status) {
-      this.setState({
-        name: "",
-        email: "",
-        password: "",
-        userType: "",
-        phone: "",
-        objectAssigned: "",
-        managerAssigned: "",
-        companyAssigned: "",
-      });
-      message.success("User Added");
-    } else {
-      message.error(`${response.data.message}`);
-    }
-  };
-
   // sub-category handlers
 
   addSubCat = () => {

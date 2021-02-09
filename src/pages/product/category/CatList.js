@@ -85,7 +85,7 @@ export default class listCat extends Component {
         key: subCat["_id"],
         render: (text, record) => {
           const searchIndex = record.sub_categories.findIndex(
-            ({ slug_name }) => slug_name === subCat.name.toLowerCase()
+            ({ slug_name }) => slug_name === subCat.slug_name
           );
           if (searchIndex !== -1)
             return (
@@ -109,8 +109,7 @@ export default class listCat extends Component {
           title="Edit this category?"
           onConfirm={(e) => {
             e.preventDefault();
-            alert("Working on edit category page.");
-            // this.props.history.push("/dfd");
+            this.props.history.push(`/product/edit-category/${record["_id"]}`);
           }}
           icon={<EditOutlined color="primary" />}
         >
