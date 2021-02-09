@@ -18,6 +18,15 @@ const { Option } = Select;
 
 const sizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 
+const combinations = [
+  [0, 1, 2],
+  [0, 2, 1],
+  [1, 0, 2],
+  [1, 2, 0],
+  [2, 0, 1],
+  [2, 1, 0],
+];
+
 export default class addProduct extends Component {
   constructor(props) {
     super(props);
@@ -55,6 +64,8 @@ export default class addProduct extends Component {
       coloursList: [],
       tags: [],
       loading: false,
+      main_shuffle: 1,
+      small_shuffle: 1,
     };
   }
 
@@ -165,6 +176,27 @@ export default class addProduct extends Component {
     product.gallery.small = gallery;
     product.display.small = arr;
     this.setState({ product });
+  };
+
+  shufflePictures = (size) => {
+    const product = Object.assign({}, this.state.product),
+      combination = combinations[this.state[`${size}_shuffle`]],
+      shuffle_no = this.state[`${size}_shuffle`];
+    const gallery_shuffle = [],
+      display_shuffle = [];
+    for (let i = 0; i < 3; i++) {
+      gallery_shuffle[i] = product.gallery[size][combination[i]];
+      display_shuffle[i] = product.display[size][combination[i]];
+    }
+
+    product.gallery[size] = gallery_shuffle;
+    product.display[size] = display_shuffle;
+    console.log(gallery_shuffle, size);
+
+    const stateObj = { product };
+    stateObj[`${size}_shuffle`] = (shuffle_no + 1) % 3;
+
+    this.setState(stateObj);
   };
 
   handleCategoryChange = (id) => {
@@ -637,6 +669,15 @@ export default class addProduct extends Component {
                               key={index}
                             />
                           ))}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              this.shufflePictures("main");
+                            }}
+                            className="shuffle-btn"
+                          >
+                            Shuffle
+                          </button>
                         </div>
                         <div
                           style={{
@@ -659,6 +700,15 @@ export default class addProduct extends Component {
                               key={index}
                             />
                           ))}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              this.shufflePictures("small");
+                            }}
+                            className="shuffle-btn"
+                          >
+                            Shuffle
+                          </button>
                         </div>
                       </div>
                       <Divider />

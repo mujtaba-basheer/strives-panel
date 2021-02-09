@@ -409,6 +409,18 @@ span.stats-view-more-modal {
   color: #fff;
 }
 
+.shuffle-btn {
+  display: inline-block;
+  background: black;
+  color: #fff;
+  outline: none;
+  border: none;
+  padding: 13px 15px;
+  text-transform: uppercase;
+  justify-self: flex-end;
+  margin-left: auto;
+}
+
 @media (max-width: 1200px) {
   .response-main-wrapper.width-four .single-response-item {
     width: calc(50% - 10px);
