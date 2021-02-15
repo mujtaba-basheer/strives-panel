@@ -124,106 +124,17 @@ export default class sidebar extends Component {
             </Link>
           </Menu.Item>
           <Divider />
-          {/* <Menu.Item key="20" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/object-type"
-            >
-              0bject Type
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="20" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/fields"
-            >
-              Fields
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="20" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/objects"
-            >
-              Objects
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="6" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/add-user"
-            >
-              Add User
-            </Link>
-          </Menu.Item>
           <Menu.Item key="7" icon="true">
             <Link
               onClick={(e) => {
                 document.body.classList.toggle("isClosed");
               }}
-              to="/add-manager"
+              to="/assets/images"
             >
-              Add Manager
+              Images
             </Link>
           </Menu.Item>
-          <Menu.Item key="15" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/company"
-            >
-              Company
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="20" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/users"
-            >
-              User's List
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="20" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/managers"
-            >
-              Manager's List
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="4" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/responses"
-            >
-              Responses
-            </Link>
-          </Menu.Item>
-          <Menu.Item key="8" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/admin/profile"
-            >
-              My Profile
-            </Link>
-          </Menu.Item> */}
+          <Divider />
           <Menu.Item key="9" icon="true">
             <Link
               onClick={(e) => {

@@ -24,6 +24,10 @@ const addCategory = lazy(() => import("./pages/product/category/AddCat"));
 const listCategory = lazy(() => import("./pages/product/category/CatList"));
 const editCategory = lazy(() => import("./pages/product/category/EditCat"));
 
+// ASSETS
+
+const images = lazy(() => import("./pages/Images"));
+
 // const UserDashboard = lazy(() => import("./pages/userdashboard"));
 // const addmanager = lazy(() => import("./pages/addmanager"));
 // const adduser = lazy(() => import("./pages/adduser"));
@@ -119,6 +123,10 @@ class Routes extends Component {
               path="/product/add-product"
               component={addProduct}
             />
+
+            {/* ASSETS */}
+
+            <ProtectedRoute exact path="/assets/images" component={images} />
 
             <ProtectedRoute
               exact
