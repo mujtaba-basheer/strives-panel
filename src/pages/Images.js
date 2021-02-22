@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Component } from "react";
 import Sidebar from "../common/sidebar";
-import { Layout, Table, PageHeader, message, Popconfirm } from "antd";
+import { Layout, Table, PageHeader, message, Popconfirm, Tooltip } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import apiCall from "../utils/apiCall";
 import "antd/dist/antd.css";
@@ -74,7 +74,17 @@ export default class Images extends Component {
     }
   };
 
-  hnadleImage = async (e) => {
+  deleteImage = async (id) => {
+    try {
+      const res = await apiCall.delete(`image/${id}`);
+      message.success(res.data.message);
+      this.refreshAPi();
+    } catch (error) {
+      message.error(error.response.data.message);
+    }
+  };
+
+  handleImage = async (e) => {
     const fileEl = document.getElementById("file-input");
     const file = fileEl.files[0];
     console.log(file);
@@ -107,11 +117,31 @@ export default class Images extends Component {
       pageSize: 1000,
     };
 
+    const { url, images } = this.state;
+
     const columns = [
       {
-        title: "Sl. No.",
+        title: "Links",
         key: "sl_no",
-        render: (text, record, index) => index + 1,
+        render: (text, record, index) => (
+          <Tooltip trigger="click" title={"Link Copied"}>
+            <a
+              href=""
+              onClick={async (e) => {
+                e.preventDefault();
+                try {
+                  if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(record["src"]);
+                  } else throw new Error("Copy link not supported");
+                } catch (error) {
+                  message.error(error.message);
+                }
+              }}
+            >
+              Copy Link
+            </a>
+          </Tooltip>
+        ),
       },
       {
         title: "Image",
@@ -136,10 +166,10 @@ export default class Images extends Component {
         key: "action",
         render: (text, record) => (
           <Popconfirm
-            title="Delete this tag?"
+            title="Delete this image?"
             onConfirm={(e) => {
               e.preventDefault();
-              this.deleteTag(record._id);
+              this.deleteImage(record._id);
             }}
             icon={
               <QuestionCircleOutlined
@@ -162,8 +192,6 @@ export default class Images extends Component {
         ),
       },
     ];
-
-    const { url, images } = this.state;
 
     return (
       <div className="dashboard-wrapper">
@@ -214,7 +242,7 @@ export default class Images extends Component {
                             <label>Upload Image</label>
                             <input
                               type="file"
-                              onChange={this.hnadleImage}
+                              onChange={this.handleImage}
                               id="file-input"
                               placeholder="Upload File"
                               required
