@@ -1,9 +1,9 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Component } from "react";
-import Sidebar from "../common/sidebar";
+import Sidebar from "../../common/sidebar";
 import { Layout, Table, PageHeader, message, Popconfirm, Tooltip } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
-import apiCall from "../utils/apiCall";
+import apiCall from "../../utils/apiCall";
 import "antd/dist/antd.css";
 const { Header, Content, Footer } = Layout;
 message.config({
@@ -65,6 +65,14 @@ export default class Images extends Component {
       if (response.data.status) {
         this.refreshAPi();
         message.success(response.data.message);
+        if (navigator.clipboard) {
+          try {
+            await navigator.clipboard.writeText(response.data.data);
+            message.success("Image Link Copied to Clipboard.");
+          } catch (error) {
+            message.error(error.message);
+          }
+        }
       } else {
         message.error(`${response.data.message}`);
       }
@@ -151,6 +159,7 @@ export default class Images extends Component {
           <img
             alt="img"
             src={text}
+            loading="lazy"
             style={{ width: "450px", height: "auto" }}
           />
         ),
@@ -281,7 +290,7 @@ export default class Images extends Component {
               </div>
             </Content>
             <Footer style={{ textAlign: "center" }}>
-              Created by amarnathmodi ©2020
+              Created by mujtaba-basheer ©2021
             </Footer>
           </Layout>
         </Layout>
