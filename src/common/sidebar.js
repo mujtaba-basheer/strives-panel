@@ -73,6 +73,16 @@ export default class sidebar extends Component {
               Tags
             </Link>
           </Menu.Item>
+          <Menu.Item key="10" icon="true">
+            <Link
+              onClick={(e) => {
+                document.body.classList.toggle("isClosed");
+              }}
+              to="/product/materials"
+            >
+              Materials
+            </Link>
+          </Menu.Item>
           <Menu.Item key="2" icon="true">
             <Link
               onClick={(e) => {

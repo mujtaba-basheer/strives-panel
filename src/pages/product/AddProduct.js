@@ -41,7 +41,7 @@ export default class addProduct extends Component {
         details: [""],
         rating: 0,
         rating_count: 0,
-        material: "",
+        materials: [],
         subtitle: "",
         category: "",
         sub_categories: [],
@@ -63,6 +63,7 @@ export default class addProduct extends Component {
       sub_categories: [],
       coloursList: [],
       tags: [],
+      materials: [],
       loading: false,
       main_shuffle: 1,
       small_shuffle: 1,
@@ -91,6 +92,14 @@ export default class addProduct extends Component {
     try {
       res = await apiCall.get("tags");
       this.setState({ tags: res.data.data.map(({ name }) => name) });
+    } catch (error) {
+      console.error(error.response);
+      message.error(error.response.data.message);
+    }
+
+    try {
+      res = await apiCall.get("materials");
+      this.setState({ materials: res.data.data });
     } catch (error) {
       console.error(error.response);
       message.error(error.response.data.message);
@@ -245,13 +254,14 @@ export default class addProduct extends Component {
       tags: tags_list,
       loading,
       coloursList,
+      materials: materials_list,
     } = this.state;
     const {
       name,
       short_description,
       free_shipping,
       available_sizes,
-      material,
+      materials,
       mrp,
       sp,
       sub_categories,
@@ -493,19 +503,6 @@ export default class addProduct extends Component {
                           </Checkbox>
                         </div>
                         <div className="col-md-3">
-                          <label>Material</label>
-                          <input
-                            required
-                            value={material}
-                            onChange={(e) => {
-                              product.material = e.target.value;
-                              this.setState({ product });
-                            }}
-                            type="text"
-                            placeholder="Material"
-                          />
-                        </div>
-                        <div className="col-md-3">
                           <label>Colour</label>
                           <Select
                             value={colour["_id"]}
@@ -601,7 +598,7 @@ export default class addProduct extends Component {
                         )}
                       </div>
                       <div className="row">
-                        <div className="col-md-12">
+                        <div className="col-md-6">
                           <label>Product Tags</label>
                           <Select
                             value={tags}
@@ -621,6 +618,30 @@ export default class addProduct extends Component {
                                 {tag}
                               </Option>
                             ))}
+                          </Select>
+                        </div>
+                        <div className="col-md-6">
+                          <label>Materials</label>
+                          <Select
+                            value={materials}
+                            mode="multiple"
+                            onChange={(e) => {
+                              product.materials = e;
+                              this.setState({ product });
+                            }}
+                            className="ant-d-form-fields"
+                            required
+                            style={{ width: 200, padding: "9px 15px" }}
+                            placeholder="Select Materials"
+                            optionFilterProp="children"
+                          >
+                            {materials_list.map(
+                              ({ name: material, slug_name: slug }) => (
+                                <Option key={slug} value={slug}>
+                                  {material}
+                                </Option>
+                              )
+                            )}
                           </Select>
                         </div>
                       </div>

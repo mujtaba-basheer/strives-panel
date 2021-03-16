@@ -22,7 +22,7 @@ class login extends Component {
       message.success("Login Successful");
       localStorage.setItem("userDetails", JSON.stringify(response.data.data));
       localStorage.setItem("token", response.data.token);
-      this.props.history.push("/product/sub-categories");
+      setImmediate(() => this.props.history.push("/orders/list"));
     } catch (error) {
       console.error(error);
       message.error(error.response.data.message);

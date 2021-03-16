@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import Sidebar from "../../common/sidebar";
 import { Layout, Table, message, PageHeader, Modal } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+// import { EditOutlined } from "@ant-design/icons";
 import apiCall from "../../utils/apiCall";
 import "antd/dist/antd.css";
 const { Header, Content, Footer } = Layout;
