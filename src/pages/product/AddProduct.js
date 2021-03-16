@@ -484,7 +484,7 @@ export default class addProduct extends Component {
                       </div>
                       <Divider />
                       <div className="row">
-                        <div className="col-md-3">
+                        <div className="col-md-4">
                           <label>Free Shipping?</label>
                           <Checkbox
                             style={{
@@ -502,7 +502,7 @@ export default class addProduct extends Component {
                             Free Shipping
                           </Checkbox>
                         </div>
-                        <div className="col-md-3">
+                        <div className="col-md-4">
                           <label>Colour</label>
                           <Select
                             value={colour["_id"]}
@@ -549,7 +549,7 @@ export default class addProduct extends Component {
                             )}
                           </Select>
                         </div>
-                        <div className="col-md-3">
+                        <div className="col-md-4">
                           <label>Category</label>
                           <Select
                             value={category}
