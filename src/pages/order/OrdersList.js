@@ -121,7 +121,7 @@ export default class ordersList extends Component {
                 const confirmReject = window.confirm("Reject this order?");
                 if (confirmReject)
                   this.updateStatus(e.target.value, record["_id"]);
-              }
+              } else this.updateStatus(e.target.value, record["_id"]);
             }}
           >
             {status_options.map(({ status, display }) => (
