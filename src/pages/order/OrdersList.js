@@ -7,6 +7,21 @@ import apiCall from "../../utils/apiCall";
 import "antd/dist/antd.css";
 const { Header, Content, Footer } = Layout;
 
+const status_options = [
+  { status: "on-hold", display: "On Hold" },
+  { status: "placed", display: "Placed" },
+  { status: "rejected", display: "Rejected" },
+  { status: "in-transit", display: "In Transit" },
+  { status: "pending", display: "Pending" },
+  { status: "scheduled", display: "Scheduled" },
+  { status: "dispatched", display: "Dispatched" },
+  { status: "delivered", display: "Delivered" },
+  { status: "cancelled", display: "Cancelled" },
+  { status: "rto", display: "Return to Origin" },
+  { status: "dto", display: "Deliver to Origin" },
+  { status: "collected", display: "Collected" },
+];
+
 export default class ordersList extends Component {
   constructor(props) {
     super(props);
@@ -25,6 +40,16 @@ export default class ordersList extends Component {
       this.setState({ orders: data.data });
     } catch (error) {
       console.error(error);
+      message.error(error.response.data.message);
+    }
+  };
+
+  updateStatus = async (status, id) => {
+    try {
+      const resp = await apiCall.put(`order/status/${id}`, { status });
+      message.success(resp.data.message);
+      this.refreshApi();
+    } catch (error) {
       message.error(error.response.data.message);
     }
   };
@@ -87,11 +112,25 @@ export default class ordersList extends Component {
         title: "Status",
         dataIndex: "status",
         key: "status",
-        render: (text = "") => {
-          const firstChar = text.charAt(0).toUpperCase();
-          const restOfStr = text.substring(1);
-          return firstChar + restOfStr;
-        },
+        render: (text = "", record) => (
+          <select
+            value={text}
+            onChange={(e) => {
+              const new_status = e.target.value;
+              if (new_status === "rejected") {
+                const confirmReject = window.confirm("Reject this order?");
+                if (confirmReject)
+                  this.updateStatus(e.target.value, record["_id"]);
+              }
+            }}
+          >
+            {status_options.map(({ status, display }) => (
+              <option key={status} value={status}>
+                {display}
+              </option>
+            ))}
+          </select>
+        ),
       },
       {
         title: "Payment Method",

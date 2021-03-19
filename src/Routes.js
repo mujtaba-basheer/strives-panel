@@ -9,7 +9,7 @@ import {
 import { Spin } from "antd";
 import { getToken } from "./utils/store";
 const LoginPage = lazy(() => import("./pages/login"));
-const Dashboard = lazy(() => import("./pages/dashboard"));
+// const Dashboard = lazy(() => import("./pages/dashboard"));
 
 // PRODUCT
 
