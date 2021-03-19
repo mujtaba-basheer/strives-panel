@@ -10,13 +10,27 @@ import {
   Spin,
 } from "antd";
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import { permutation } from "array-permutation";
 import apiCall from "../../utils/apiCall";
 
 import "antd/dist/antd.css";
 const { Header, Content, Footer } = Layout;
 const { Option } = Select;
 
-const sizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+const sizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "C"];
+
+const types = [
+  { val: "kurti", name: "Kurti" },
+  { val: "pant", name: "Pant" },
+  { val: "gown", name: "Gown" },
+  { val: "lehenga", name: "Lehenga" },
+  { val: "dress", name: "Dress" },
+  { val: "plazo", name: "Plazo" },
+  { val: "sharara", name: "Sharara" },
+  { val: "gharara", name: "Gharara" },
+  { val: "skirt", name: "Skirt" },
+  { val: "blouse", name: "Blouse" },
+];
 
 const combinations = [
   [0, 1, 2],
@@ -58,7 +72,9 @@ export default class addProduct extends Component {
           small: [],
         },
         isBlocked: true,
+        set: [],
       },
+      photos_num: undefined,
       categories: [],
       sub_categories: [],
       coloursList: [],
@@ -67,6 +83,7 @@ export default class addProduct extends Component {
       loading: false,
       main_shuffle: 1,
       small_shuffle: 1,
+      combinations: [[]],
     };
   }
 
@@ -106,6 +123,20 @@ export default class addProduct extends Component {
     }
   };
 
+  handlePicsNum = (e) => {
+    const photos_num = Number(e.target.value);
+    if (photos_num > 0 && Number.isInteger(photos_num)) {
+      const combinations = [],
+        base_arr = [];
+      for (let i = 0; i < photos_num; i++) base_arr.push(i);
+
+      const perm = permutation(base_arr);
+      for (let combination of perm) combinations.push(combination);
+
+      this.setState({ combinations, photos_num });
+    } else this.setState({ photos_num });
+  };
+
   upload = (file) => {
     const reader = new FileReader();
     return new Promise((res, rej) => {
@@ -122,6 +153,12 @@ export default class addProduct extends Component {
   };
 
   setMainGallery = async (e) => {
+    const { photos_num } = this.state;
+    if (!photos_num || photos_num < 0) {
+      message.warning("Select Number of Pictures First");
+      return;
+    }
+
     const { files } = e.target,
       arr = [],
       gallery = [];
@@ -155,6 +192,12 @@ export default class addProduct extends Component {
   };
 
   setSmallGallery = async (e) => {
+    const { photos_num } = this.state;
+    if (!photos_num || photos_num < 0) {
+      message.warning("Select Number of Pictures First");
+      return;
+    }
+
     const { files } = e.target,
       arr = [],
       gallery = [];
@@ -189,11 +232,12 @@ export default class addProduct extends Component {
 
   shufflePictures = (size) => {
     const product = Object.assign({}, this.state.product),
-      combination = combinations[this.state[`${size}_shuffle`]],
-      shuffle_no = this.state[`${size}_shuffle`];
+      combination = this.state.combinations[this.state[`${size}_shuffle`]],
+      shuffle_no = this.state[`${size}_shuffle`],
+      photos_num = this.state.photos_num;
     const gallery_shuffle = [],
       display_shuffle = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < photos_num; i++) {
       gallery_shuffle[i] = product.gallery[size][combination[i]];
       display_shuffle[i] = product.display[size][combination[i]];
     }
@@ -203,7 +247,7 @@ export default class addProduct extends Component {
     console.log(gallery_shuffle, size);
 
     const stateObj = { product };
-    stateObj[`${size}_shuffle`] = (shuffle_no + 1) % 3;
+    stateObj[`${size}_shuffle`] = (shuffle_no + 1) % photos_num;
 
     this.setState(stateObj);
   };
@@ -255,6 +299,7 @@ export default class addProduct extends Component {
       loading,
       coloursList,
       materials: materials_list,
+      photos_num,
     } = this.state;
     const {
       name,
@@ -273,6 +318,7 @@ export default class addProduct extends Component {
       tags,
       stocks_available,
       colour,
+      set,
     } = product;
 
     return (
@@ -338,10 +384,9 @@ export default class addProduct extends Component {
                             placeholder="Name"
                           />
                         </div>
-                        <div className="col-md-9">
+                        <div className="col-md-6">
                           <label>Short Description</label>
                           <input
-                            required
                             value={short_description}
                             onChange={(e) => {
                               product.short_description = e.target.value;
@@ -349,6 +394,15 @@ export default class addProduct extends Component {
                             }}
                             type="text"
                             placeholder="Description"
+                          />
+                        </div>
+                        <div className="col-md-3">
+                          <label>Number of Pictures</label>
+                          <input
+                            value={photos_num}
+                            onChange={this.handlePicsNum.bind(this)}
+                            type="number"
+                            placeholder="Number"
                           />
                         </div>
                         <div className="col-md-3">
@@ -403,10 +457,9 @@ export default class addProduct extends Component {
                             placeholder="No. of Stocks"
                           />
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-md-4">
                           <label>Subtitle</label>
                           <input
-                            required
                             value={subtitle}
                             onChange={(e) => {
                               product.subtitle = e.target.value;
@@ -416,7 +469,7 @@ export default class addProduct extends Component {
                             placeholder="Subtitle"
                           />
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-md-4">
                           <label>Sizes Available</label>
                           <Select
                             mode="multiple"
@@ -436,6 +489,29 @@ export default class addProduct extends Component {
                             {sizes.map((size) => (
                               <Option key={size} value={size}>
                                 {size}
+                              </Option>
+                            ))}
+                          </Select>
+                        </div>
+                        <div className="col-md-4">
+                          <label>Product/Set Types</label>
+                          <Select
+                            mode="multiple"
+                            value={set}
+                            onChange={(e) => {
+                              product.set = e;
+                              this.setState({ product });
+                            }}
+                            allowClear
+                            className="ant-d-form-fields"
+                            showSearch
+                            style={{ width: 200, padding: "9px 15px" }}
+                            placeholder="Select Set Types"
+                            optionFilterProp="children"
+                          >
+                            {types.map(({ val, name }) => (
+                              <Option key={val} value={val}>
+                                {name}
                               </Option>
                             ))}
                           </Select>
