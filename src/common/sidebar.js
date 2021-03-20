@@ -113,16 +113,6 @@ export default class sidebar extends Component {
               Colours
             </Link>
           </Menu.Item>
-          <Menu.Item key="5" icon="true">
-            <Link
-              onClick={(e) => {
-                document.body.classList.toggle("isClosed");
-              }}
-              to="/product/add-product"
-            >
-              Add Product
-            </Link>
-          </Menu.Item>
           <Menu.Item key="6" icon="true">
             <Link
               onClick={(e) => {
@@ -131,6 +121,27 @@ export default class sidebar extends Component {
               to="/product/list-category"
             >
               Categories List
+            </Link>
+          </Menu.Item>
+          <Divider />
+          <Menu.Item key="11" icon="true">
+            <Link
+              onClick={(e) => {
+                document.body.classList.toggle("isClosed");
+              }}
+              to="/product/list"
+            >
+              Products List
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="5" icon="true">
+            <Link
+              onClick={(e) => {
+                document.body.classList.toggle("isClosed");
+              }}
+              to="/product/add-product"
+            >
+              Add Product
             </Link>
           </Menu.Item>
           <Divider />

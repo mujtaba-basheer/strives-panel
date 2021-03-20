@@ -32,7 +32,7 @@ const types = [
   { val: "blouse", name: "Blouse" },
 ];
 
-export default class addProduct extends Component {
+export default class editProduct extends Component {
   constructor(props) {
     super(props);
     this.state = {

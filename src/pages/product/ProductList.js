@@ -1,17 +1,28 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import Sidebar from "../../common/sidebar";
 import { Layout, Table, message, Popconfirm, PageHeader, Modal } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import apiCall from "../../utils/apiCall";
 import "antd/dist/antd.css";
 const { Header, Content, Footer } = Layout;
 
 const booleanRender = (status = false) => (
-  <span style={{ color: status ? "#1890ff" : "red" }}>
+  <span style={{ color: status ? "#1890ff" : "var(--danger)" }}>
     {status ? "Yes" : "No"}
   </span>
 );
+
+const blockRender = (isBlocked = false) => (
+  <span style={{ color: isBlocked ? "var(--primary)" : "var(--danger)" }}>
+    {isBlocked ? "Unblock" : "Block"}
+  </span>
+);
+
+const capitalize = (s) => {
+  if (typeof s !== "string") return "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
 
 export default class productList extends Component {
   constructor(props) {
@@ -39,6 +50,28 @@ export default class productList extends Component {
     this.refreshApi();
   };
 
+  deleteProduct = async (id) => {
+    try {
+      const res = await apiCall.delete(`product/${id}`);
+      message.success(res.data.message);
+      this.refreshApi();
+    } catch (error) {
+      console.error(error);
+      message.error(error.response.data.message);
+    }
+  };
+
+  blockUnblockProduct = async (id, status) => {
+    try {
+      const res = await apiCall.put(`product/status/${id}`, { status });
+      message.success(res.data.message);
+      this.refreshApi();
+    } catch (error) {
+      console.error(error);
+      message.error(error.response.data.message);
+    }
+  };
+
   render() {
     let pagination = {
       current: 1,
@@ -55,18 +88,18 @@ export default class productList extends Component {
         width: 150,
         fixed: "left",
       },
-      {
-        title: "Short Description",
-        dataIndex: "short_description",
-        key: "short_description",
-        width: 200,
-      },
-      {
-        title: "Subtitle",
-        dataIndex: "subtitle",
-        key: "subtitle",
-        width: 200,
-      },
+      // {
+      //   title: "Short Description",
+      //   dataIndex: "short_description",
+      //   key: "short_description",
+      //   width: 200,
+      // },
+      // {
+      //   title: "Subtitle",
+      //   dataIndex: "subtitle",
+      //   key: "subtitle",
+      //   width: 200,
+      // },
       {
         title: "Gallery",
         dataIndex: "gallery",
@@ -120,19 +153,19 @@ export default class productList extends Component {
         render: (text) => booleanRender(text),
         width: 125,
       },
-      {
-        title: "Details",
-        dataIndex: "details",
-        key: "details",
-        render: (text) => (
-          <ul>
-            {text.map((val, index) => (
-              <li key={index}>{val}</li>
-            ))}
-          </ul>
-        ),
-        width: 200,
-      },
+      // {
+      //   title: "Details",
+      //   dataIndex: "details",
+      //   key: "details",
+      //   render: (text) => (
+      //     <ul>
+      //       {text.map((val, index) => (
+      //         <li key={index}>{val}</li>
+      //       ))}
+      //     </ul>
+      //   ),
+      //   width: 200,
+      // },
       {
         title: "Rating",
         dataIndex: "rating",
@@ -147,8 +180,15 @@ export default class productList extends Component {
       },
       {
         title: "Material",
-        dataIndex: "material",
-        key: "material",
+        dataIndex: "materials",
+        key: "materials",
+        render: (text) => (
+          <ul>
+            {text.map((val, index) => (
+              <li key={index}>{capitalize(val)}</li>
+            ))}
+          </ul>
+        ),
         width: 100,
       },
       {
@@ -168,13 +208,6 @@ export default class productList extends Component {
         title: "Sub-Categories",
         dataIndex: "sub_categories",
         key: "sub_categories",
-        // render: (text) => (
-        //   <ul>
-        //     {text.map(({ _id, name, value }) => (
-        //       <li key={_id}>{`${name}: ${value}`}</li>
-        //     ))}
-        //   </ul>
-        // ),
         render: (text) => (
           <table>
             {text.map(({ _id, name, value }) => (
@@ -239,33 +272,74 @@ export default class productList extends Component {
       title: "Action",
       key: "action",
       render: (text, record) => (
-        <Popconfirm
-          title="Edit this category?"
-          onConfirm={(e) => {
-            e.preventDefault();
-            alert("Working on product edit page!");
-            // this.props.history.push(`/product/edit-category/${record["_id"]}`);
-          }}
-          icon={<EditOutlined color="primary" />}
-        >
-          <a
-            href=""
-            onClick={(e) => {
+        <Fragment>
+          <Popconfirm
+            title="Edit this product?"
+            onConfirm={(e) => {
               e.preventDefault();
+              alert("Working on product edit page!");
+              // this.props.history.push(`/product/edit-category/${record["_id"]}`);
             }}
-            style={{ marginRight: "10px" }}
+            icon={<EditOutlined color="primary" />}
           >
-            Edit
-          </a>
-        </Popconfirm>
+            <a
+              href=""
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+              style={{ marginRight: "10px" }}
+            >
+              Edit
+            </a>
+          </Popconfirm>
+          <Popconfirm
+            title={`${record.isBlocked ? "Unb" : "B"}lock this product?`}
+            onConfirm={(e) => {
+              e.preventDefault();
+              this.blockUnblockProduct(
+                record["_id"],
+                record.isBlocked ? false : true
+              );
+            }}
+            icon={<EditOutlined />}
+          >
+            <a
+              href=""
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+              style={{ marginRight: "10px" }}
+            >
+              {blockRender(record.isBlocked)}
+            </a>
+          </Popconfirm>
+          <Popconfirm
+            title="Delete this product?"
+            onConfirm={(e) => {
+              e.preventDefault();
+              this.deleteProduct(record["_id"]);
+            }}
+            icon={<DeleteOutlined style={{ color: "#dc3545" }} />}
+          >
+            <a
+              href=""
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+              style={{ color: "#dc3545" }}
+            >
+              Delete
+            </a>
+          </Popconfirm>
+        </Fragment>
       ),
-      width: 75,
+      width: 180,
     });
 
     return (
       <div className="dashboard-wrapper">
         <Layout>
-          <Sidebar activeNo={"6"} />
+          <Sidebar activeNo={"11"} />
           <Layout className="site-layout" style={{ marginLeft: 200 }}>
             <Header
               className="site-layout-background"
