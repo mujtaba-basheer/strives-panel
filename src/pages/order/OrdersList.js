@@ -9,7 +9,7 @@ const { Header, Content, Footer } = Layout;
 
 const status_options = [
   { status: "on-hold", display: "On Hold" },
-  { status: "placed", display: "Placed" },
+  { status: "confirmed", display: "Confirmed" },
   { status: "rejected", display: "Rejected" },
   { status: "in-transit", display: "In Transit" },
   { status: "pending", display: "Pending" },
