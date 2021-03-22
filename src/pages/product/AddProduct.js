@@ -247,7 +247,6 @@ export default class addProduct extends Component {
     const category = categories.find(({ _id }) => id === _id);
     if (category) {
       const { tags, sub_categories } = category;
-      console.log(sub_categories);
       const product = Object.assign({}, this.state.product);
       product.tags = tags;
       product.category = id;
@@ -257,7 +256,6 @@ export default class addProduct extends Component {
         subCatObj.value = "";
         return subCatObj;
       });
-      console.log(product.sub_categories, sub_categories);
       this.setState({
         sub_categories,
         product,

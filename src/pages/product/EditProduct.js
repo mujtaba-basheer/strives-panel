@@ -10,7 +10,6 @@ import {
   Spin,
 } from "antd";
 import { DeleteOutlined, PlusCircleOutlined } from "@ant-design/icons";
-import { permutation } from "array-permutation";
 import apiCall from "../../utils/apiCall";
 
 import "antd/dist/antd.css";
@@ -54,19 +53,11 @@ export default class editProduct extends Component {
         discount: undefined,
         stocks_available: undefined,
         colour: {},
-        gallery: {
-          main: [{ name: "", data: "", src: "", type: "", extension: "" }],
-          small: [{ name: "", data: "", src: "", type: "", extension: "" }],
-        },
-        display: {
-          main: [],
-          small: [],
-        },
         set: [],
       },
       photos_num: undefined,
       categories: [],
-      sub_categories: [],
+      sub_categories: [{ values: [] }],
       coloursList: [],
       tags: [],
       materials: [],
@@ -74,172 +65,71 @@ export default class editProduct extends Component {
       main_shuffle: 1,
       small_shuffle: 1,
       combinations: [[]],
+      product_id: "",
     };
   }
 
   componentDidMount = async () => {
-    let res;
+    const product_id = this.props.location.pathname.split("/")[3];
+    let product;
 
     try {
-      res = await apiCall.get("colours");
-      this.setState({ coloursList: res.data.data });
+      let resp = await apiCall.get(`product/${product_id}`);
+      product = Object.assign({}, resp.data.data);
+
+      delete product.gallery;
+      delete product.isBlocked;
+      delete product.slug_name;
+      delete product.date;
+
+      this.setState({ product, product_id });
     } catch (error) {
-      console.error(error.response);
-      message.error(error.response.data.message);
+      console.error(error);
+      if (error.response) message.error(error.response.data.message);
     }
+
+    const api0 = apiCall.get("colours");
+    const api1 = apiCall.get("categories");
+    const api2 = apiCall.get("tags");
+    const api3 = apiCall.get("materials");
 
     try {
-      res = await apiCall.get("categories");
-      this.setState({ categories: res.data.data });
-    } catch (error) {
-      console.error(error.response);
-      message.error(error.response.data.message);
-    }
+      const [
+        {
+          data: { data: data0 },
+        },
+        {
+          data: { data: data1 },
+        },
+        {
+          data: { data: data2 },
+        },
+        {
+          data: { data: data3 },
+        },
+      ] = await Promise.all([api0, api1, api2, api3]);
 
-    try {
-      res = await apiCall.get("tags");
-      this.setState({ tags: res.data.data.map(({ name }) => name) });
-    } catch (error) {
-      console.error(error.response);
-      message.error(error.response.data.message);
-    }
+      const categories = [...data1];
+      const category = categories.find(({ _id }) => product.category === _id);
+      let sub_categories;
+      if (category) sub_categories = category.sub_categories;
+      else
+        sub_categories = product.sub_categories.map(({ _id }) => ({
+          values: [],
+          _id,
+        }));
 
-    try {
-      res = await apiCall.get("materials");
-      this.setState({ materials: res.data.data });
-    } catch (error) {
-      console.error(error.response);
-      message.error(error.response.data.message);
-    }
-  };
-
-  handlePicsNum = (e) => {
-    const photos_num = Number(e.target.value);
-    if (photos_num > 0 && Number.isInteger(photos_num)) {
-      const combinations = [],
-        base_arr = [];
-      for (let i = 0; i < photos_num; i++) base_arr.push(i);
-
-      const perm = permutation(base_arr);
-      for (let combination of perm) combinations.push(combination);
-
-      this.setState({ combinations, photos_num });
-    } else this.setState({ photos_num });
-  };
-
-  upload = (file) => {
-    const reader = new FileReader();
-    return new Promise((res, rej) => {
-      reader.addEventListener("load", (e) => {
-        const base64 = e.target.result.split("base64,")[1];
-        res(base64);
+      this.setState({
+        coloursList: data0,
+        categories: data1,
+        sub_categories,
+        tags: data2,
+        materials: data3,
       });
-      reader.addEventListener("error", (ev) => {
-        console.error(ev.target.error);
-        rej(new Error("Error Uploading File."));
-      });
-      reader.readAsDataURL(file);
-    });
-  };
-
-  setMainGallery = async (e) => {
-    const { photos_num } = this.state;
-    if (!photos_num || photos_num < 0) {
-      message.warning("Select Number of Pictures First");
-      return;
+    } catch (error) {
+      console.error(error);
+      if (error.response) message.error(error.response.data.message);
     }
-
-    const { files } = e.target,
-      arr = [],
-      gallery = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const extension = file.name.substring(file.name.lastIndexOf(".")),
-        name = file.name,
-        mimeType = file.type;
-
-      try {
-        const data = await this.upload(file);
-
-        gallery.push({
-          name,
-          data,
-          extension,
-          type: mimeType,
-        });
-
-        arr.push(URL.createObjectURL(file));
-      } catch (error) {
-        console.error(error);
-        message.error(error.message);
-      }
-    }
-
-    const product = Object.assign({}, this.state.product);
-    product.gallery.main = gallery;
-    product.display.main = arr;
-    this.setState({ product });
-  };
-
-  setSmallGallery = async (e) => {
-    const { photos_num } = this.state;
-    if (!photos_num || photos_num < 0) {
-      message.warning("Select Number of Pictures First");
-      return;
-    }
-
-    const { files } = e.target,
-      arr = [],
-      gallery = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const extension = file.name.substring(file.name.lastIndexOf(".")),
-        name = file.name,
-        mimeType = file.type;
-
-      try {
-        const data = await this.upload(file);
-
-        gallery.push({
-          name,
-          data,
-          extension,
-          type: mimeType,
-        });
-
-        arr.push(URL.createObjectURL(file));
-      } catch (error) {
-        console.error(error);
-        message.error(error.message);
-      }
-    }
-
-    const product = Object.assign({}, this.state.product);
-    product.gallery.small = gallery;
-    product.display.small = arr;
-    this.setState({ product });
-  };
-
-  shufflePictures = (size) => {
-    const product = Object.assign({}, this.state.product),
-      combination = this.state.combinations[this.state[`${size}_shuffle`]],
-      shuffle_no = this.state[`${size}_shuffle`],
-      photos_num = this.state.photos_num;
-    const gallery_shuffle = [],
-      display_shuffle = [];
-    for (let i = 0; i < photos_num; i++) {
-      gallery_shuffle[i] = product.gallery[size][combination[i]];
-      display_shuffle[i] = product.display[size][combination[i]];
-    }
-
-    product.gallery[size] = gallery_shuffle;
-    product.display[size] = display_shuffle;
-    console.log(gallery_shuffle, size);
-
-    const stateObj = { product };
-    stateObj[`${size}_shuffle`] = (shuffle_no + 1) % photos_num;
-
-    this.setState(stateObj);
   };
 
   handleCategoryChange = (id) => {
@@ -268,12 +158,14 @@ export default class editProduct extends Component {
   handleSubmit = async (e) => {
     e.preventDefault();
     this.setState({ loading: true });
+
+    const { product_id } = this.state;
     const product = Object.assign({}, this.state.product);
     delete product.display;
     try {
-      const res = await apiCall.post("product", product);
+      const res = await apiCall.put(`product/${product_id}`, product);
       message.success(res.data.message);
-      setTimeout(() => window.location.reload(), 2000);
+      setTimeout(() => this.props.history.push("/product/list"), 2000);
     } catch (error) {
       console.error(error.response);
       message.error(error.response.data.message);
@@ -290,7 +182,6 @@ export default class editProduct extends Component {
       loading,
       coloursList,
       materials: materials_list,
-      photos_num,
     } = this.state;
     const {
       name,
@@ -305,7 +196,6 @@ export default class editProduct extends Component {
       category,
       details,
       discount,
-      display,
       tags,
       stocks_available,
       colour,
@@ -354,7 +244,7 @@ export default class editProduct extends Component {
                     <PageHeader
                       className="site-page-header"
                       onBack={null}
-                      title="Add Product"
+                      title="Edit Product"
                       subTitle=""
                     />
                     <form
@@ -375,7 +265,7 @@ export default class editProduct extends Component {
                             placeholder="Name"
                           />
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-md-9">
                           <label>Short Description</label>
                           <input
                             value={short_description}
@@ -385,15 +275,6 @@ export default class editProduct extends Component {
                             }}
                             type="text"
                             placeholder="Description"
-                          />
-                        </div>
-                        <div className="col-md-3">
-                          <label>Number of Pictures</label>
-                          <input
-                            value={photos_num}
-                            onChange={this.handlePicsNum.bind(this)}
-                            type="number"
-                            placeholder="Number"
                           />
                         </div>
                         <div className="col-md-3">
@@ -652,12 +533,17 @@ export default class editProduct extends Component {
                                 placeholder="Select Value"
                                 optionFilterProp="children"
                               >
-                                {sub_categories_list[index].values.map(
-                                  (val) => (
-                                    <Option key={val} value={val}>
-                                      {val}
-                                    </Option>
+                                {sub_categories_list.length ===
+                                sub_categories.length ? (
+                                  sub_categories_list[index].values.map(
+                                    (val) => (
+                                      <Option key={val} value={val}>
+                                        {val}
+                                      </Option>
+                                    )
                                   )
+                                ) : (
+                                  <Option value={null}>Select Value</Option>
                                 )}
                               </Select>
                             </div>
@@ -712,100 +598,13 @@ export default class editProduct extends Component {
                           </Select>
                         </div>
                       </div>
-                      <Divider>Pictures</Divider>
-                      <div className="row">
-                        <div className="col-md-6">
-                          <label>Pictures (Big)</label>
-                          <input
-                            required
-                            multiple
-                            onChange={this.setMainGallery.bind(this)}
-                            type="file"
-                            accept="image/*"
-                            placeholder="Images"
-                          />
-                        </div>
-                        <div className="col-md-6">
-                          <label>Pictures (Small)</label>
-                          <input
-                            required
-                            multiple
-                            onChange={this.setSmallGallery.bind(this)}
-                            type="file"
-                            accept="image/*"
-                            placeholder="Images"
-                          />
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "10px",
-                            alignItems: "center",
-                            marginBottom: "1em",
-                            justifyContent: "space-evenly",
-                          }}
-                          className="col-md-12"
-                        >
-                          {display.main.map((src, index) => (
-                            <img
-                              style={{
-                                width: "auto",
-                                height: "150px",
-                              }}
-                              alt=""
-                              src={src}
-                              key={index}
-                            />
-                          ))}
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              this.shufflePictures("main");
-                            }}
-                            className="shuffle-btn"
-                          >
-                            Shuffle
-                          </button>
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "10px",
-                            alignItems: "center",
-                            marginTop: "1em",
-                            justifyContent: "space-evenly",
-                          }}
-                          className="col-md-12"
-                        >
-                          {display.small.map((src, index) => (
-                            <img
-                              style={{
-                                width: "auto",
-                                height: "100px",
-                              }}
-                              alt=""
-                              src={src}
-                              key={index}
-                            />
-                          ))}
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              this.shufflePictures("small");
-                            }}
-                            className="shuffle-btn"
-                          >
-                            Shuffle
-                          </button>
-                        </div>
-                      </div>
                       <Divider />
                       <div className="row">
                         <div className="col-md-12">
                           <input
                             type="submit"
                             className="form-button"
-                            value="ADD PRODUCT"
+                            value="UPDATE PRODUCT"
                           />
                         </div>
                       </div>

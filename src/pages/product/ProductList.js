@@ -1,7 +1,15 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Component, Fragment } from "react";
 import Sidebar from "../../common/sidebar";
-import { Layout, Table, message, Popconfirm, PageHeader, Modal } from "antd";
+import {
+  Layout,
+  Table,
+  message,
+  Popconfirm,
+  PageHeader,
+  Modal,
+  Spin,
+} from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import apiCall from "../../utils/apiCall";
 import "antd/dist/antd.css";
@@ -31,18 +39,22 @@ export default class productList extends Component {
       activeSet: [],
       visible: false,
       products: [],
+      loading: false,
     };
   }
 
   refreshApi = async () => {
+    this.setState({ loading: true });
     try {
       const res = await apiCall.get("products");
       this.setState({
         products: res.data.data,
+        loading: false,
       });
     } catch (error) {
       console.error(error);
       message.error(error.response.data.message);
+      this.setState({ loading: false });
     }
   };
 
@@ -51,6 +63,7 @@ export default class productList extends Component {
   };
 
   deleteProduct = async (id) => {
+    this.setState({ loading: true });
     try {
       const res = await apiCall.delete(`product/${id}`);
       message.success(res.data.message);
@@ -59,9 +72,11 @@ export default class productList extends Component {
       console.error(error);
       message.error(error.response.data.message);
     }
+    this.setState({ loading: false });
   };
 
   blockUnblockProduct = async (id, status) => {
+    this.setState({ loading: true });
     try {
       const res = await apiCall.put(`product/status/${id}`, { status });
       message.success(res.data.message);
@@ -70,6 +85,7 @@ export default class productList extends Component {
       console.error(error);
       message.error(error.response.data.message);
     }
+    this.setState({ loading: false });
   };
 
   render() {
@@ -78,7 +94,7 @@ export default class productList extends Component {
       pageSize: 1000,
     };
 
-    const { products, activeSet, visible } = this.state;
+    const { products, activeSet, visible, loading } = this.state;
 
     const columns = [
       {
@@ -277,8 +293,7 @@ export default class productList extends Component {
             title="Edit this product?"
             onConfirm={(e) => {
               e.preventDefault();
-              alert("Working on product edit page!");
-              // this.props.history.push(`/product/edit-category/${record["_id"]}`);
+              this.props.history.push(`/product/edit/${record["_id"]}`);
             }}
             icon={<EditOutlined color="primary" />}
           >
@@ -380,14 +395,16 @@ export default class productList extends Component {
                     title="Products List"
                     subTitle=""
                   />
-                  <Table
-                    className="managerlisttable"
-                    dataSource={products}
-                    pagination={pagination}
-                    columns={columns}
-                    bordered
-                    scroll={{ x: 1000, y: 1000 }}
-                  />
+                  <Spin spinning={loading} size="large">
+                    <Table
+                      className="managerlisttable"
+                      dataSource={products}
+                      pagination={pagination}
+                      columns={columns}
+                      bordered
+                      scroll={{ x: 1000, y: 1000 }}
+                    />
+                  </Spin>
                 </div>
               </div>
               <Modal

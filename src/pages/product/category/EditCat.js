@@ -37,7 +37,9 @@ export default class addCat extends Component {
         })),
         category_id,
       });
-    } catch (error) {}
+    } catch (error) {
+      message.error(error.response.data.message);
+    }
     let response = apiCall.get("sub-categories");
     let response1 = apiCall.get("tags");
     let data = await Promise.all([response, response1]);
