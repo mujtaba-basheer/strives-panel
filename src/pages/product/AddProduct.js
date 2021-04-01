@@ -511,7 +511,6 @@ export default class addProduct extends Component {
                         {details.map((value, index) => (
                           <div key={index} className="col-md-12 table-input">
                             <div className="col-md-6">
-                              {/* <label>Detail: {index + 1}</label> */}
                               <input
                                 required
                                 value={details[index]}
@@ -645,7 +644,6 @@ export default class addProduct extends Component {
                                   this.setState({ product });
                                 }}
                                 className="ant-d-form-fields"
-                                required
                                 style={{ width: 200, padding: "9px 15px" }}
                                 placeholder="Select Value"
                                 optionFilterProp="children"

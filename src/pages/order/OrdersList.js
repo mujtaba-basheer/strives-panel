@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Component } from "react";
 import Sidebar from "../../common/sidebar";
-import { Layout, Table, message, PageHeader, Modal } from "antd";
+import { Layout, Table, message, PageHeader, Modal, Spin } from "antd";
 // import { EditOutlined } from "@ant-design/icons";
 import apiCall from "../../utils/apiCall";
 import "antd/dist/antd.css";
@@ -27,13 +27,17 @@ export default class ordersList extends Component {
     super(props);
     this.state = {
       activeSet: {},
-      visible: false,
+      showItems: false,
       orders: [],
       items: [],
+      address: [],
+      showAddress: false,
+      loading: true,
     };
   }
 
   refreshApi = async () => {
+    this.setState({ loading: true });
     try {
       const { data } = await apiCall.get("orders");
 
@@ -42,6 +46,8 @@ export default class ordersList extends Component {
       console.error(error);
       message.error(error.response.data.message);
     }
+
+    this.setState({ loading: false });
   };
 
   updateStatus = async (status, id) => {
@@ -64,7 +70,14 @@ export default class ordersList extends Component {
       pageSize: 1000,
     };
 
-    const { orders, visible, items } = this.state;
+    const {
+      orders,
+      showItems,
+      items,
+      address,
+      showAddress,
+      loading,
+    } = this.state;
 
     const columns = [
       {
@@ -77,6 +90,26 @@ export default class ordersList extends Component {
             dateStr = dateObj.toLocaleDateString();
           return `${dateStr}, ${timeStr}`;
         },
+      },
+      {
+        title: "Address",
+        dataIndex: "address",
+        key: "address",
+        render: (text) => (
+          <a
+            onClick={(e) => {
+              e.preventDefault();
+
+              this.setState({
+                address: [text],
+                showAddress: true,
+              });
+            }}
+            href="#"
+          >
+            View Address
+          </a>
+        ),
       },
       {
         title: "Amount (₹)",
@@ -93,7 +126,7 @@ export default class ordersList extends Component {
               e.preventDefault();
               this.setState({
                 items: text,
-                visible: true,
+                showItems: true,
               });
             }}
             href="#"
@@ -175,6 +208,64 @@ export default class ordersList extends Component {
         key: "size",
         render: (text) => text && text.toUpperCase(),
       },
+      {
+        title: "Custom Size",
+        dataIndex: "custom",
+        key: "custom",
+        render: (text) => {
+          if (!text) return "NA";
+          else {
+            const customSize = Object.keys(text).map((key) => ({
+              field: key,
+              size: text[key],
+            }));
+
+            return (
+              <ul>
+                {customSize.map(({ field, size }, index) => (
+                  <li key={field}>
+                    {field.toUpperCase()}: {size} in.
+                  </li>
+                ))}
+              </ul>
+            );
+          }
+        },
+      },
+    ];
+
+    const address_columns = [
+      {
+        title: "Address 1",
+        dataIndex: "address1",
+        key: "address1",
+        width: 600,
+      },
+      {
+        title: "Address 2",
+        dataIndex: "address2",
+        key: "address2",
+      },
+      {
+        title: "City",
+        dataIndex: "city",
+        key: "city",
+      },
+      {
+        title: "State",
+        dataIndex: "state",
+        key: "state",
+      },
+      {
+        title: "Landmark",
+        dataIndex: "landmark",
+        key: "landmark",
+      },
+      {
+        title: "Pincode",
+        dataIndex: "pincode",
+        key: "pincode",
+      },
     ];
 
     return (
@@ -220,28 +311,30 @@ export default class ordersList extends Component {
                     onBack={null}
                     title="Orders List"
                   />
-                  <Table
-                    className="managerlisttable"
-                    dataSource={orders}
-                    pagination={pagination}
-                    columns={columns}
-                    bordered
-                    scroll={{ x: 1000, y: 1000 }}
-                  />
+                  <Spin size="large" spinning={loading}>
+                    <Table
+                      className="managerlisttable"
+                      dataSource={orders}
+                      pagination={pagination}
+                      columns={columns}
+                      bordered
+                      scroll={{ x: 1000, y: 1000 }}
+                    />
+                  </Spin>
                 </div>
               </div>
               <Modal
                 title="Items List"
-                visible={visible}
+                visible={showItems}
                 onCancel={(e) => {
                   e.preventDefault();
                   this.setState({
-                    visible: false,
+                    showItems: false,
                     items: [],
                   });
                 }}
                 footer={null}
-                style={{ width: "100%!important", maxWidth: "600px" }}
+                style={{ width: "100%!important", maxWidth: "750px" }}
                 className="w-100"
               >
                 <div className="row">
@@ -252,6 +345,34 @@ export default class ordersList extends Component {
                         dataSource={items}
                         pagination={false}
                         columns={items_columns}
+                        bordered
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Modal>
+              <Modal
+                title="User's Address"
+                visible={showAddress}
+                onCancel={(e) => {
+                  e.preventDefault();
+                  this.setState({
+                    showAddress: false,
+                    address: [],
+                  });
+                }}
+                footer={null}
+                style={{ width: "100%!important", maxWidth: "1400px" }}
+                className="w-100"
+              >
+                <div className="row">
+                  <div className="col-md-12">
+                    <div className="main-content">
+                      <Table
+                        className="userlisttable"
+                        dataSource={address}
+                        pagination={false}
+                        columns={address_columns}
                         bordered
                       />
                     </div>
