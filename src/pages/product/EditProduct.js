@@ -39,6 +39,7 @@ export default class editProduct extends Component {
         name: "",
         short_description: "",
         available_sizes: [],
+        collection: undefined,
         mrp: undefined,
         sp: undefined,
         free_shipping: false,
@@ -61,6 +62,7 @@ export default class editProduct extends Component {
       coloursList: [],
       tags: [],
       materials: [],
+      collections: [],
       loading: false,
       main_shuffle: 1,
       small_shuffle: 1,
@@ -92,6 +94,7 @@ export default class editProduct extends Component {
     const api1 = apiCall.get("categories");
     const api2 = apiCall.get("tags");
     const api3 = apiCall.get("materials");
+    const api4 = apiCall.get("collections");
 
     try {
       const [
@@ -107,7 +110,10 @@ export default class editProduct extends Component {
         {
           data: { data: data3 },
         },
-      ] = await Promise.all([api0, api1, api2, api3]);
+        {
+          data: { data: data4 },
+        },
+      ] = await Promise.all([api0, api1, api2, api3, api4]);
 
       const categories = [...data1];
       const category = categories.find(({ _id }) => product.category === _id);
@@ -125,6 +131,7 @@ export default class editProduct extends Component {
         sub_categories,
         tags: data2,
         materials: data3,
+        collections: data4,
       });
     } catch (error) {
       console.error(error);
@@ -182,6 +189,7 @@ export default class editProduct extends Component {
       loading,
       coloursList,
       materials: materials_list,
+      collections,
     } = this.state;
     const {
       name,
@@ -192,6 +200,7 @@ export default class editProduct extends Component {
       mrp,
       sp,
       sub_categories,
+      collection,
       subtitle,
       category,
       details,
@@ -432,7 +441,7 @@ export default class editProduct extends Component {
                       </div>
                       <Divider />
                       <div className="row">
-                        <div className="col-md-4">
+                        <div className="col-md-3">
                           <label>Free Shipping?</label>
                           <Checkbox
                             style={{
@@ -450,7 +459,7 @@ export default class editProduct extends Component {
                             Free Shipping
                           </Checkbox>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-3">
                           <label>Colour</label>
                           <Select
                             value={colour["_id"]}
@@ -497,7 +506,28 @@ export default class editProduct extends Component {
                             )}
                           </Select>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-3">
+                          <label>Collection</label>
+                          <Select
+                            value={collection}
+                            onChange={(e) => {
+                              product.collection = e;
+                              this.setState({ product });
+                            }}
+                            className="ant-d-form-fields"
+                            required
+                            style={{ width: 200, padding: "9px 15px" }}
+                            placeholder="Select Collection"
+                            optionFilterProp="children"
+                          >
+                            {collections.map(({ _id: id, name }) => (
+                              <Option key={id} value={id}>
+                                {name}
+                              </Option>
+                            ))}
+                          </Select>
+                        </div>
+                        <div className="col-md-3">
                           <label>Category</label>
                           <Select
                             value={category}

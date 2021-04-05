@@ -49,6 +49,7 @@ export default class addProduct extends Component {
         materials: [],
         subtitle: "",
         category: "",
+        collection: undefined,
         sub_categories: [],
         tags: [],
         discount: undefined,
@@ -69,6 +70,7 @@ export default class addProduct extends Component {
       sub_categories: [],
       coloursList: [],
       tags: [],
+      collections: [],
       materials: [],
       loading: false,
       main_shuffle: 1,
@@ -78,35 +80,30 @@ export default class addProduct extends Component {
   }
 
   componentDidMount = async () => {
-    let res;
+    const res0 = apiCall.get("colours");
+    const res1 = apiCall.get("categories");
+    const res2 = apiCall.get("tags");
+    const res3 = apiCall.get("materials");
+    const res4 = apiCall.get("collections");
 
     try {
-      res = await apiCall.get("colours");
-      this.setState({ coloursList: res.data.data });
-    } catch (error) {
-      console.error(error.response);
-      message.error(error.response.data.message);
-    }
+      const [
+        { data: data0 },
+        { data: data1 },
+        { data: data2 },
+        { data: data3 },
+        { data: data4 },
+      ] = await Promise.all([res0, res1, res2, res3, res4]);
 
-    try {
-      res = await apiCall.get("categories");
-      this.setState({ categories: res.data.data });
-    } catch (error) {
-      console.error(error.response);
-      message.error(error.response.data.message);
-    }
+      console.log(data4.data);
 
-    try {
-      res = await apiCall.get("tags");
-      this.setState({ tags: res.data.data.map(({ name }) => name) });
-    } catch (error) {
-      console.error(error.response);
-      message.error(error.response.data.message);
-    }
-
-    try {
-      res = await apiCall.get("materials");
-      this.setState({ materials: res.data.data });
+      this.setState({
+        coloursList: data0.data,
+        categories: data1.data,
+        tags: data2.data,
+        materials: data3.data,
+        collections: data4.data,
+      });
     } catch (error) {
       console.error(error.response);
       message.error(error.response.data.message);
@@ -289,6 +286,7 @@ export default class addProduct extends Component {
       coloursList,
       materials: materials_list,
       photos_num,
+      collections,
     } = this.state;
     const {
       name,
@@ -299,6 +297,7 @@ export default class addProduct extends Component {
       mrp,
       sp,
       sub_categories,
+      collection,
       subtitle,
       category,
       details,
@@ -548,7 +547,7 @@ export default class addProduct extends Component {
                       </div>
                       <Divider />
                       <div className="row">
-                        <div className="col-md-4">
+                        <div className="col-md-3">
                           <label>Free Shipping?</label>
                           <Checkbox
                             style={{
@@ -566,7 +565,7 @@ export default class addProduct extends Component {
                             Free Shipping
                           </Checkbox>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-3">
                           <label>Colour</label>
                           <Select
                             value={colour["_id"]}
@@ -613,7 +612,28 @@ export default class addProduct extends Component {
                             )}
                           </Select>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-3">
+                          <label>Collection</label>
+                          <Select
+                            value={collection}
+                            onChange={(e) => {
+                              product.collection = e;
+                              this.setState({ product });
+                            }}
+                            className="ant-d-form-fields"
+                            required
+                            style={{ width: 200, padding: "9px 15px" }}
+                            placeholder="Select Collection"
+                            optionFilterProp="children"
+                          >
+                            {collections.map(({ _id: id, name }) => (
+                              <Option key={id} value={id}>
+                                {name}
+                              </Option>
+                            ))}
+                          </Select>
+                        </div>
+                        <div className="col-md-3">
                           <label>Category</label>
                           <Select
                             value={category}
