@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import Sidebar from "../../common/sidebar";
-import { Layout, Table, PageHeader, message, Popconfirm } from "antd";
+import { Layout, Table, PageHeader, message, Popconfirm, Modal } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import apiCall from "../../utils/apiCall";
 import "antd/dist/antd.css";
@@ -18,6 +18,8 @@ export default class Collections extends Component {
       visible: false,
       activeSet: {},
       name: "",
+      tagline: "",
+      showEdit: false,
     };
   }
 
@@ -41,14 +43,34 @@ export default class Collections extends Component {
   };
 
   addCollection = async () => {
+    const { name, tagline } = this.state;
+
     try {
-      let response = await apiCall.post("collection", {
-        name: this.state.name,
-      });
+      let response = await apiCall.post("collection", { name, tagline });
       if (response.data.status) {
         this.setState({
           name: "",
+          tagline: "",
         });
+        this.refreshAPi();
+        message.success(response.data.message);
+      } else {
+        message.error(`${response.data.message}`);
+      }
+    } catch (error) {
+      console.error(error.message);
+      message.error(error.response.data.message);
+    }
+  };
+
+  updateCollection = async (id) => {
+    console.log(id);
+    const { name, tagline } = this.state.activeSet;
+
+    try {
+      let response = await apiCall.put(`collection/${id}`, { name, tagline });
+      if (response.data.status) {
+        this.setState({ activeSet: {}, showEdit: false });
         this.refreshAPi();
         message.success(response.data.message);
       } else {
@@ -95,35 +117,50 @@ export default class Collections extends Component {
         title: "Action",
         key: "action",
         render: (text, record) => (
-          <Popconfirm
-            title="Delete this collection?"
-            onConfirm={(e) => {
-              e.preventDefault();
-              this.deleteCollection(record._id);
-            }}
-            icon={
-              <QuestionCircleOutlined
-                style={{
-                  color: "red",
-                }}
-              />
-            }
-          >
+          <Fragment>
             <a
+              style={{ marginRight: "10px" }}
               href=""
               onClick={(e) => {
                 e.preventDefault();
+                this.setState({
+                  activeSet: record,
+                  showEdit: true,
+                });
               }}
-              style={{ color: "darkred" }}
             >
-              Delete
+              Edit
             </a>
-          </Popconfirm>
+            <Popconfirm
+              title="Delete this collection?"
+              onConfirm={(e) => {
+                e.preventDefault();
+                this.deleteCollection(record._id);
+              }}
+              icon={
+                <QuestionCircleOutlined
+                  style={{
+                    color: "red",
+                  }}
+                />
+              }
+            >
+              <a
+                href=""
+                onClick={(e) => {
+                  e.preventDefault();
+                }}
+                style={{ color: "darkred", marginLeft: "10px" }}
+              >
+                Delete
+              </a>
+            </Popconfirm>
+          </Fragment>
         ),
       },
     ];
 
-    const { name, collections } = this.state;
+    const { name, collections, tagline, activeSet, showEdit } = this.state;
 
     return (
       <div className="dashboard-wrapper">
@@ -183,6 +220,17 @@ export default class Collections extends Component {
                           </div>
                           <div className="col-md-12">
                             <input
+                              type="text"
+                              value={tagline}
+                              onChange={(e) =>
+                                this.setState({ tagline: e.target.value })
+                              }
+                              placeholder="Collection Tagline"
+                              required
+                            />
+                          </div>
+                          <div className="col-md-12">
+                            <input
                               type="submit"
                               className="form-button"
                               value="ADD COLLECTION"
@@ -203,6 +251,68 @@ export default class Collections extends Component {
                   </div>
                 </div>
               </div>
+              <Modal
+                title="Edit Collection"
+                visible={showEdit}
+                onCancel={(e) => {
+                  e.preventDefault();
+                  this.setState({
+                    showEdit: false,
+                    activeSet: {},
+                  });
+                }}
+                footer={null}
+                style={{ width: "100%!important", maxWidth: "600px" }}
+                className="w-100"
+              >
+                <div className="row">
+                  <div className="col-md-12">
+                    <div className="main-content">
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          this.updateCollection(activeSet["_id"]);
+                        }}
+                        className="custom-form"
+                      >
+                        <div className="row">
+                          <div className="col-md-12">
+                            <input
+                              type="text"
+                              value={activeSet.name}
+                              onChange={(e) => {
+                                e.preventDefault();
+                                activeSet.name = e.target.value;
+                                this.setState({ activeSet });
+                              }}
+                              placeholder="Collection Name"
+                            />
+                          </div>
+                          <div className="col-md-12">
+                            <input
+                              type="text"
+                              value={activeSet.tagline}
+                              onChange={(e) => {
+                                e.preventDefault();
+                                activeSet.tagline = e.target.value;
+                                this.setState({ activeSet });
+                              }}
+                              placeholder="Collection Tagline"
+                            />
+                          </div>
+                          <div className="col-md-12">
+                            <input
+                              type="submit"
+                              className="form-button"
+                              value="UPDATE COLLECTION"
+                            />
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </Modal>
             </Content>
             <Footer style={{ textAlign: "center" }}>
               Created by mujtaba-basheer ©2021
