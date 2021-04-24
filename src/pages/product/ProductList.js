@@ -9,11 +9,14 @@ import {
   PageHeader,
   Modal,
   Spin,
+  Button,
 } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import apiCall from "../../utils/apiCall";
 import "antd/dist/antd.css";
 const { Header, Content, Footer } = Layout;
+
+const { stringify: qryStr } = require("querystring");
 
 const booleanRender = (status = false) => (
   <span style={{ color: status ? "#1890ff" : "var(--danger)" }}>
@@ -40,13 +43,16 @@ export default class productList extends Component {
       visible: false,
       products: [],
       loading: false,
+      filters: {},
+      activeId: "",
     };
   }
 
   refreshApi = async () => {
     this.setState({ loading: true });
     try {
-      const res = await apiCall.get("products");
+      const filterStr = qryStr(this.state.filters);
+      const res = await apiCall.get(`products?${filterStr}`);
       this.setState({
         products: res.data.data,
         loading: false,
@@ -94,7 +100,14 @@ export default class productList extends Component {
       pageSize: 1000,
     };
 
-    const { products, activeSet, visible, loading } = this.state;
+    const {
+      products,
+      activeSet,
+      visible,
+      loading,
+      filters,
+      activeId,
+    } = this.state;
 
     const columns = [
       {
@@ -117,9 +130,31 @@ export default class productList extends Component {
       //   width: 200,
       // },
       {
-        title: "Gallery",
+        title: "Gallery (Main)",
         dataIndex: "gallery",
-        key: "gallery",
+        key: "gallery_main",
+        render: (text, record, index) => (
+          <a
+            href=""
+            onClick={(e) => {
+              e.preventDefault();
+              this.setState({
+                activeSet: record.gallery.main,
+                visible: true,
+                activeId: record["_id"],
+              });
+            }}
+            style={{ marginRight: "10px" }}
+          >
+            View Gallery
+          </a>
+        ),
+        width: 200,
+      },
+      {
+        title: "Gallery (Small)",
+        dataIndex: "gallery",
+        key: "gallery_small",
         render: (text, record, index) => (
           <a
             href=""
@@ -128,6 +163,7 @@ export default class productList extends Component {
               this.setState({
                 activeSet: record.gallery.small,
                 visible: true,
+                activeId: record["_id"],
               });
             }}
             style={{ marginRight: "10px" }}
@@ -395,6 +431,52 @@ export default class productList extends Component {
                     title="Products List"
                     subTitle=""
                   />
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      this.refreshApi();
+                    }}
+                    className="mb-4 custom-form add-product w-100"
+                  >
+                    <div className="row">
+                      <div className="col-md-2">
+                        <span className="field_information">
+                          Filter by name
+                        </span>
+                        <input
+                          value={filters.name}
+                          onChange={(e) => {
+                            filters.name = e.target.value;
+                            this.setState({ filters });
+                          }}
+                        />
+                        {filters.name ? (
+                          <a
+                            href=""
+                            onClick={(e) => {
+                              e.preventDefault();
+                              delete filters.name;
+                              this.setState({ filters }, () =>
+                                this.refreshApi()
+                              );
+                            }}
+                          >
+                            {" "}
+                            <span className="field_information">
+                              <strong>Clear Filter</strong>
+                            </span>
+                          </a>
+                        ) : null}
+                      </div>
+                      <div className="col-md-3">
+                        <input
+                          type="submit"
+                          className="form-button mb-3"
+                          value="Filter"
+                        />
+                      </div>
+                    </div>
+                  </form>
                   <Spin spinning={loading} size="large">
                     <Table
                       className="managerlisttable"
@@ -416,12 +498,27 @@ export default class productList extends Component {
                     activeSet: [],
                   });
                 }}
-                footer={null}
+                footer={[
+                  <Button
+                    color="primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      this.props.history.push(
+                        `/product/edit-images/${activeId}`
+                      );
+                    }}
+                  >
+                    Update Images
+                  </Button>,
+                ]}
                 width={1500}
               >
                 <div className="row">
                   <div className="col-md-12">
-                    <div style={{ display: "flex" }} className="main-content">
+                    <div
+                      style={{ display: "flex", gap: "1em" }}
+                      className="main-content"
+                    >
                       {activeSet.map((item) => (
                         <div key={item.details["ETag"]}>
                           <img

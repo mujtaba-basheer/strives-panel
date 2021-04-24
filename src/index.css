@@ -421,6 +421,27 @@ span.stats-view-more-modal {
   margin-left: auto;
 }
 
+.cross-btn {
+  position: absolute;
+  top: -12.5px;
+  right: -12.5px;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: black;
+  cursor: pointer;
+  color: #fff;
+
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.ant-modal-footer {
+  text-align: left !important;
+}
+
 @media (max-width: 1200px) {
   .response-main-wrapper.width-four .single-response-item {
     width: calc(50% - 10px);
