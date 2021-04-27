@@ -253,7 +253,7 @@ export default class productList extends Component {
         title: "Category",
         dataIndex: "category",
         key: "category",
-        render: (text) => text && text[0]["name"],
+        render: (text, record) => text && text[0] && text[0]["name"],
         width: 200,
       },
       {
