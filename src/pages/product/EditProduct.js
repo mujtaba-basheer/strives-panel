@@ -596,9 +596,9 @@ export default class editProduct extends Component {
                             placeholder="Select Tags"
                             optionFilterProp="children"
                           >
-                            {tags_list.map((tag) => (
-                              <Option key={tag} value={tag}>
-                                {tag}
+                            {tags_list.map(({ _id: id, name }) => (
+                              <Option key={id} value={name}>
+                                {name}
                               </Option>
                             ))}
                           </Select>
