@@ -43,25 +43,48 @@ export default class productList extends Component {
       visible: false,
       products: [],
       loading: false,
-      filters: {},
+      filters: { page: 1, name: "" },
       activeId: "",
+      pagination: {
+        current: 1,
+        defaultCurrent: 1,
+        defaultPageSize: 20,
+        total: undefined,
+      },
     };
   }
 
   refreshApi = async () => {
     this.setState({ loading: true });
+
+    const pagination = Object.assign({}, this.state.pagination);
+    const filters = Object.assign({}, this.state.filters);
+
+    const filterStr = qryStr(filters);
+    const call0 = apiCall.get(`products?${filterStr}`);
+    const call1 = apiCall.get(`products-num?${filterStr}`);
+
     try {
-      const filterStr = qryStr(this.state.filters);
-      const res = await apiCall.get(`products?${filterStr}`);
-      this.setState({
-        products: res.data.data,
-        loading: false,
-      });
+      const [{ data: res0 }, { data: res1 }] = await Promise.all([
+        call0,
+        call1,
+      ]);
+
+      pagination.current = filters.page;
+      pagination.total = res1.data;
+
+      this.setState({ products: res0.data, pagination }, () =>
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      );
     } catch (error) {
       console.error(error);
       message.error(error.response.data.message);
-      this.setState({ loading: false });
+
+      filters.page = pagination.current;
+      this.setState({ filters });
     }
+
+    this.setState({ loading: false });
   };
 
   componentDidMount = () => {
@@ -95,11 +118,6 @@ export default class productList extends Component {
   };
 
   render() {
-    let pagination = {
-      current: 1,
-      pageSize: 1000,
-    };
-
     const {
       products,
       activeSet,
@@ -107,9 +125,18 @@ export default class productList extends Component {
       loading,
       filters,
       activeId,
+      pagination,
     } = this.state;
 
     const columns = [
+      {
+        title: "Sl. No.",
+        key: "sl_no",
+        width: 75,
+        fixed: "left",
+        render: (text, record, index) =>
+          (pagination.current - 1) * 20 + index + 1,
+      },
       {
         title: "Name",
         dataIndex: "name",
@@ -262,16 +289,22 @@ export default class productList extends Component {
         key: "sub_categories",
         render: (text) => (
           <table>
-            {text.map(({ _id, name, value }) => (
-              <tr key={_id}>
-                <td style={{ border: "1px solid #000", padding: ".25em 1em" }}>
-                  {name}
-                </td>
-                <td style={{ border: "1px solid #000", padding: ".25em 1em" }}>
-                  {value}
-                </td>
-              </tr>
-            ))}
+            <tbody>
+              {text.map(({ _id, name, value }) => (
+                <tr key={_id}>
+                  <td
+                    style={{ border: "1px solid #000", padding: ".25em 1em" }}
+                  >
+                    {name}
+                  </td>
+                  <td
+                    style={{ border: "1px solid #000", padding: ".25em 1em" }}
+                  >
+                    {value}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         ),
         width: 300,
@@ -481,10 +514,19 @@ export default class productList extends Component {
                     <Table
                       className="managerlisttable"
                       dataSource={products}
-                      pagination={pagination}
+                      pagination={{
+                        ...pagination,
+                        onChange: (page) => {
+                          filters.page = page;
+                          this.setState(
+                            { filters },
+                            this.refreshApi.bind(this)
+                          );
+                        },
+                      }}
                       columns={columns}
                       bordered
-                      scroll={{ x: 1000, y: 1000 }}
+                      scroll={{ x: 1000 }}
                     />
                   </Spin>
                 </div>

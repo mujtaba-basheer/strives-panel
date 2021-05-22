@@ -1,7 +1,15 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Component } from "react";
 import Sidebar from "../../common/sidebar";
-import { Layout, Table, PageHeader, message, Popconfirm, Tooltip } from "antd";
+import {
+  Layout,
+  Table,
+  PageHeader,
+  message,
+  Popconfirm,
+  Tooltip,
+  Spin,
+} from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import apiCall from "../../utils/apiCall";
 import "antd/dist/antd.css";
@@ -17,10 +25,12 @@ export default class Images extends Component {
       file: {},
       images: [],
       url: "",
+      loading: false,
     };
   }
 
   refreshAPi = async () => {
+    this.setState({ loading: true });
     document.getElementById("file-input").value = null;
 
     try {
@@ -37,6 +47,8 @@ export default class Images extends Component {
     } catch (error) {
       message.error(error.response.data.message);
     }
+
+    this.setState({ loading: false });
   };
 
   upload = (file) => {
@@ -125,7 +137,7 @@ export default class Images extends Component {
       pageSize: 1000,
     };
 
-    const { url, images } = this.state;
+    const { url, images, loading } = this.state;
 
     const columns = [
       {
@@ -156,12 +168,14 @@ export default class Images extends Component {
         dataIndex: "src",
         key: "src",
         render: (text) => (
-          <img
-            alt="img"
-            src={text}
-            loading="lazy"
-            style={{ width: "450px", height: "auto" }}
-          />
+          <div style={{ minHeight: "250px" }}>
+            <img
+              alt="img"
+              src={text}
+              loading="lazy"
+              style={{ width: "450px", height: "auto" }}
+            />
+          </div>
         ),
       },
       {
@@ -279,11 +293,13 @@ export default class Images extends Component {
                   </div>
                   <div className="col-md-8">
                     <div className="main-content">
-                      <Table
-                        dataSource={images}
-                        pagination={pagination}
-                        columns={columns}
-                      />
+                      <Spin spinning={loading}>
+                        <Table
+                          dataSource={images}
+                          pagination={pagination}
+                          columns={columns}
+                        />
+                      </Spin>
                     </div>
                   </div>
                 </div>
