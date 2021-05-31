@@ -35,6 +35,14 @@ const capitalize = (s) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
+const categoriesList = [
+  { id: "all", name: "All" },
+  { id: "60212edfff106c000451ba02", name: "Lehengas" },
+  { id: "60212faaff106c000451ba03", name: "Salwar Kameez" },
+  { id: "6021307bff106c000451ba04", name: "Gowns" },
+  { id: "602130d9ff106c000451ba05", name: "Sets" },
+];
+
 export default class productList extends Component {
   constructor(props) {
     super(props);
@@ -43,7 +51,7 @@ export default class productList extends Component {
       visible: false,
       products: [],
       loading: false,
-      filters: { page: 1, name: "" },
+      filters: { page: 1, name: "", category: undefined },
       activeId: "",
       pagination: {
         current: 1,
@@ -489,6 +497,45 @@ export default class productList extends Component {
                             onClick={(e) => {
                               e.preventDefault();
                               delete filters.name;
+                              this.setState({ filters }, () =>
+                                this.refreshApi()
+                              );
+                            }}
+                          >
+                            {" "}
+                            <span className="field_information">
+                              <strong>Clear Filter</strong>
+                            </span>
+                          </a>
+                        ) : null}
+                      </div>
+                      <div className="col-md-2">
+                        <span className="field_information">
+                          Filter by Category
+                        </span>
+                        <select
+                          value={filters.category}
+                          placeholder="Category"
+                          onChange={(e) => {
+                            const category = e.target.value;
+                            if (category === "all") delete filters.category;
+                            else filters.category = category;
+
+                            this.setState({ filters });
+                          }}
+                        >
+                          {categoriesList.map(({ id, name }) => (
+                            <option key={id} value={id}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                        {filters.category ? (
+                          <a
+                            href=""
+                            onClick={(e) => {
+                              e.preventDefault();
+                              delete filters.category;
                               this.setState({ filters }, () =>
                                 this.refreshApi()
                               );
